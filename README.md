@@ -1,10 +1,10 @@
-# MERN Stack Testing & Debugging Guide
+# Bug Tracker - MERN Stack Application
 
 [![Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)](https://github.com/your-repo/coverage)
 [![Stack](https://img.shields.io/badge/stack-MERN-blue)](https://mern.io/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A comprehensive testing and debugging strategy for MERN stack applications featuring unit testing, integration testing, end-to-end testing, and advanced debugging techniques.
+A comprehensive bug tracking application built with the MERN stack, featuring testing, debugging, and advanced development practices.
 
 ## 📋 Table of Contents
 
@@ -21,11 +21,11 @@ A comprehensive testing and debugging strategy for MERN stack applications featu
 
 ## 🚀 Overview
 
-This guide provides a complete testing solution for MERN stack applications, ensuring code quality, reliability, and maintainability through a multi-layered testing approach.
+A bug tracking application built with MongoDB, Express.js, React, and Node.js, featuring comprehensive testing strategies and debugging techniques.
 
 ### Key Features
 
-- ✅ **Multi-layered Testing**: Unit, Integration, and E2E testing
+- ✅ **Bug Management**: Create, update, delete, and track bugs efficiently
 - 🐛 **Advanced Debugging**: Comprehensive error handling and monitoring
 - 📊 **Code Coverage**: 70%+ coverage threshold enforcement
 - 🔧 **Developer Experience**: Hot-reload, watch mode, and CI/CD ready
@@ -43,38 +43,45 @@ This guide provides a complete testing solution for MERN stack applications, ens
 
 ```bash
 # Clone the repository
-git clone <your-repo>
-cd mern-testing-setup
+git clone https://github.com/PLP-MERN-Stack-Development/testing-and-debugging-ensuring-mern-app-reliability-TJ-dot-1.git
+cd testing-and-debugging-ensuring-mern-app-reliability-TJ-dot-1
 
-# Install dependencies
-npm install
+# Install server dependencies
+cd server && npm install
 
-# Install testing dependencies
-npm install -D jest @testing-library/react cypress supertest mongodb-memory-server
+# Install client dependencies
+cd ../client && npm install
 
-# Setup environment
+# Setup environment (create .env file in server directory)
+cd ../server
 cp .env.example .env
+# Edit .env to add your MongoDB URI
+```
+
+### Run the Application
+
+```bash
+# Start the server (from server directory)
+cd server && npm run dev
+
+# In another terminal, start the client (from client directory)
+cd client && npm start
 ```
 
 ### Run Tests
 
 ```bash
-# Run all tests
-npm test
+# Run server tests
+cd server && npm test
 
-# Run tests in watch mode
-npm run test:watch
+# Run client tests
+cd client && npm test
+
+# Run E2E tests
+cd client && npm run test:e2e
 
 # Run with coverage
 npm run test:coverage
-
-# Run E2E tests
-npm run test:e2e
-
-# Run specific test types
-npm run test:unit
-npm run test:integration
-npm run test:e2e:headless
 ```
 
 ## 🧪 Testing Strategy
@@ -163,44 +170,52 @@ afterAll(async () => {
 });
 ```
 
+## 📝 Features
+
+### Bug Management
+- **Create Bugs**: Add new bugs with title, description, and status
+- **Update Bugs**: Modify existing bug information and status
+- **Delete Bugs**: Remove bugs from the system
+- **View Bugs**: Display all bugs in a clean, organized list
+
+### Technical Features
+- **MERN Stack**: MongoDB, Express.js, React, Node.js
+- **RESTful API**: Well-structured API endpoints
+- **Error Handling**: Comprehensive error boundaries and logging
+- **Testing**: Unit, integration, and E2E tests
+- **Performance**: Optimized components with performance monitoring
+
 ## 📝 Testing Examples
 
 ### Unit Testing
 
 **React Components**
 ```javascript
-// UserForm.test.jsx
+// BugForm.test.jsx
 import { render, screen, fireEvent } from '@testing-library/react';
-import UserForm from './UserForm';
+import BugForm from './BugForm';
 
-test('submits form with user data', async () => {
+test('submits bug form with valid data', async () => {
   const mockSubmit = jest.fn();
 
-  render(<UserForm onSubmit={mockSubmit} />);
+  render(<BugForm onSubmit={mockSubmit} />);
 
-  fireEvent.change(screen.getByLabelText(/name/i), {
-    target: { value: 'John Doe' }
+  fireEvent.change(screen.getByLabelText(/title/i), {
+    target: { value: 'Login Issue' }
+  });
+
+  fireEvent.change(screen.getByLabelText(/description/i), {
+    target: { value: 'Cannot login with valid credentials' }
   });
 
   fireEvent.click(screen.getByRole('button', { name: /submit/i }));
 
   await waitFor(() => {
     expect(mockSubmit).toHaveBeenCalledWith({
-      name: 'John Doe'
+      title: 'Login Issue',
+      description: 'Cannot login with valid credentials',
+      status: 'open'
     });
-  });
-});
-```
-
-**Utility Functions**
-```javascript
-// utils.test.js
-import { formatDate, validateEmail } from './utils';
-
-describe('formatDate', () => {
-  it('formats date correctly', () => {
-    const date = new Date('2023-01-01');
-    expect(formatDate(date)).toBe('January 1, 2023');
   });
 });
 ```
@@ -209,22 +224,23 @@ describe('formatDate', () => {
 
 **API Endpoints**
 ```javascript
-// userApi.test.js
+// bugs.test.js
 const request = require('supertest');
-const app = require('../app');
+const app = require('../server');
 
-describe('POST /api/users', () => {
-  it('creates a new user', async () => {
+describe('POST /api/bugs', () => {
+  it('creates a new bug', async () => {
     const response = await request(app)
-      .post('/api/users')
+      .post('/api/bugs')
       .send({
-        name: 'Test User',
-        email: 'test@example.com'
+        title: 'Test Bug',
+        description: 'This is a test bug',
+        status: 'open'
       })
       .expect(201);
 
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.email).toBe('test@example.com');
+    expect(response.body).toHaveProperty('_id');
+    expect(response.body.title).toBe('Test Bug');
   });
 });
 ```
@@ -232,16 +248,16 @@ describe('POST /api/users', () => {
 ### E2E Testing with Cypress
 
 ```javascript
-// user_flows.cy.js
-describe('User Registration', () => {
-  it('registers new user successfully', () => {
-    cy.visit('/register');
-    cy.get('[data-testid=email]').type('test@example.com');
-    cy.get('[data-testid=password]').type('password123');
-    cy.get('[data-testid=submit]').click();
+// bug_flows.cy.js
+describe('Bug Management', () => {
+  it('creates and displays a new bug', () => {
+    cy.visit('/');
 
-    cy.url().should('include', '/dashboard');
-    cy.get('[data-testid=welcome-message]').should('be.visible');
+    cy.get('[data-testid=bug-title]').type('UI Bug');
+    cy.get('[data-testid=bug-description]').type('Button styling issue');
+    cy.get('[data-testid=submit-bug]').click();
+
+    cy.get('[data-testid=bug-list]').should('contain', 'UI Bug');
   });
 });
 ```
