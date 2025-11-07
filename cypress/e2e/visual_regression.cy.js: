@@ -1,0 +1,17 @@
+describe('Visual Regression Tests', () => {
+  it('should match homepage screenshot', () => {
+    cy.visit('/');
+    cy.matchImageSnapshot('homepage');
+  });
+
+  it('should match login page screenshot', () => {
+    cy.visit('/login');
+    cy.matchImageSnapshot('login-page');
+  });
+
+  it('should match dashboard screenshot', () => {
+    cy.login('test@example.com', 'password123');
+    cy.visit('/dashboard');
+    cy.matchImageSnapshot('dashboard');
+  });
+});

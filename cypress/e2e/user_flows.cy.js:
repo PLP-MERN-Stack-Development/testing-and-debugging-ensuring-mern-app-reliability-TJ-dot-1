@@ -1,0 +1,93 @@
+describe('User Management Flows', () => {
+  beforeEach(() => {
+    cy.visit('/');
+  });
+
+  describe('User Registration', () => {
+    it('should register a new user successfully', () => {
+      cy.visit('/register');
+      
+      cy.get('[data-testid=name-input]').type('Test User');
+      cy.get('[data-testid=email-input]').type('test@example.com');
+      cy.get('[data-testid=password-input]').type('password123');
+      cy.get('[data-testid=confirm-password-input]').type('password123');
+      
+      cy.get('[data-testid=register-button]').click();
+      
+      cy.url().should('include', '/dashboard');
+      cy.get('[data-testid=welcome-message]').should('contain', 'Test User');
+    });
+
+    it('should show validation errors for invalid input', () => {
+      cy.visit('/register');
+      
+      cy.get('[data-testid=register-button]').click();
+      
+      cy.get('[data-testid=error-name]').should('be.visible');
+      cy.get('[data-testid=error-email]').should('be.visible');
+    });
+  });
+
+  describe('User Login', () => {
+    it('should login existing user', () => {
+      cy.visit('/login');
+      
+      cy.get('[data-testid=email-input]').type('test@example.com');
+      cy.get('[data-testid=password-input]').type('password123');
+      
+      cy.get('[data-testid=login-button]').click();
+      
+      cy.url().should('include', '/dashboard');
+      cy.getCookie('authToken').should('exist');
+    });
+
+    it('should show error for invalid credentials', () => {
+      cy.visit('/login');
+      
+      cy.get('[data-testid=email-input]').type('wrong@example.com');
+      cy.get('[data-testid=password-input]').type('wrongpassword');
+      
+      cy.get('[data-testid=login-button]').click();
+      
+      cy.get('[data-testid=login-error]').should('be.visible');
+    });
+  });
+
+  describe('CRUD Operations', () => {
+    beforeEach(() => {
+      // Login before each test
+      cy.login('test@example.com', 'password123');
+    });
+
+    it('should create a new item', () => {
+      cy.visit('/items');
+      
+      cy.get('[data-testid=add-item-button]').click();
+      cy.get('[data-testid=item-name-input]').type('New Item');
+      cy.get('[data-testid=save-item-button]').click();
+      
+      cy.get('[data-testid=items-list]').should('contain', 'New Item');
+    });
+
+    it('should update an existing item', () => {
+      cy.visit('/items');
+      
+      cy.get('[data-testid=edit-item-button]').first().click();
+      cy.get('[data-testid=item-name-input]').clear().type('Updated Item');
+      cy.get('[data-testid=save-item-button]').click();
+      
+      cy.get('[data-testid=items-list]').should('contain', 'Updated Item');
+    });
+
+    it('should delete an item', () => {
+      cy.visit('/items');
+      
+      const initialCount = cy.get('[data-testid=item-row]').its('length');
+      
+      cy.get('[data-testid=delete-item-button]').first().click();
+      cy.get('[data-testid=confirm-delete-button]').click();
+      
+      cy.get('[data-testid=items-list]').should('not.contain', 'Test Item');
+    });
+  });
+});
